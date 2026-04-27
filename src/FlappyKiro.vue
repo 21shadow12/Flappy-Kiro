@@ -63,9 +63,42 @@ let ghost = {
   y: 300,              // Vertical position (updated each frame)
   width: 40,           // Collision box width
   height: 40,          // Collision box height
-  velocity: 0,         // Current vertical velocity (pixels per frame)
-  gravity: 0.5,        // Downward acceleration per frame
-  jumpForce: -10       // Upward velocity applied on jump (negative = upward)
+  velocity: 0          // Current vertical velocity (pixels per frame)
+}
+
+// Pipe entities - obstacles that move from right to left
+// Non-reactive array for high-performance game loop
+// Each pipe object structure:
+// {
+//   x: number,              // Horizontal position (moves left each frame)
+//   width: number,          // Pipe width for collision detection
+//   gapY: number,           // Y position of gap center
+//   gapHeight: number,      // Height of passable gap between top and bottom pipes
+//   passed: boolean         // Flag to track if ghost has passed (for score tracking)
+// }
+let pipes = []
+
+// Frame counter for pipe generation timing
+let frameCounter = 0
+
+// Configuration object for game parameters
+// Non-reactive for high-performance game loop
+// All game logic should reference these config values
+const config = {
+  // Physics parameters
+  gravity: 0.5,           // Downward acceleration per frame
+  jumpForce: -10,         // Upward velocity applied on jump (negative = upward)
+  
+  // Pipe parameters
+  pipeSpeed: 3,           // Pixels per frame that pipes move left
+  pipeGap: 150,           // Height of the gap between top and bottom pipes
+  pipeInterval: 120,      // Frames between pipe generation (2 seconds at 60 FPS)
+  pipeWidth: 60,          // Width of pipes
+  
+  // Responsive design parameters
+  baseWidth: 800,         // Base canvas width for scaling calculations
+  baseHeight: 600,        // Base canvas height for scaling calculations
+  scaleFactor: 1          // Current scale factor (updated on resize)
 }
 
 // ============================================================================
@@ -82,7 +115,7 @@ let ghost = {
  */
 function updateGhostPhysics() {
   // Apply gravity to velocity (downward acceleration)
-  ghost.velocity += ghost.gravity
+  ghost.velocity += config.gravity
   
   // Update y position based on velocity
   ghost.y += ghost.velocity
@@ -103,7 +136,231 @@ function handleJump() {
   }
   
   // Apply jump force (negative = upward velocity)
-  ghost.velocity = ghost.jumpForce
+  ghost.velocity = config.jumpForce
+}
+
+/**
+ * Render the ghost character
+ * Uses fillRect as a placeholder for sprite rendering
+ * 
+ * Rendering:
+ * - Draws a white rectangle at ghost's current position
+ * - Uses ghost's width and height for dimensions
+ * 
+ * TODO: Replace fillRect with sprite image rendering
+ * - Load ghost sprite from assets/ghosty.png (40x40 base dimensions)
+ * - Use ctx.drawImage(ghostSprite, ghost.x, ghost.y, ghost.width, ghost.height)
+ * - Ensure sprite scales with canvas dimensions using ghost.width and ghost.height
+ */
+function renderGhost() {
+  // Placeholder rendering with solid color
+  ctx.fillStyle = '#FFFFFF' // White ghost
+  ctx.fillRect(ghost.x, ghost.y, ghost.width, ghost.height)
+  
+  // TODO: Replace with sprite image when assets are integrated
+  // ctx.drawImage(ghostSprite, ghost.x, ghost.y, ghost.width, ghost.height)
+}
+
+/**
+ * Generate a new pipe pair with random gap positioning
+ * Creates a pipe object with top and bottom segments and a gap between them
+ * 
+ * Gap positioning:
+ * - Gap center (gapY) is randomly positioned within valid bounds
+ * - Minimum clearance from top and bottom ensures gap is always passable
+ * - Gap height is defined by config.pipeGap
+ * 
+ * Pipe properties:
+ * - x: Starts at right edge of canvas
+ * - width: Defined by config.pipeWidth
+ * - gapY: Random Y position of gap center
+ * - gapHeight: Height of passable gap
+ * - passed: Initially false, set to true when ghost passes for score tracking
+ */
+function generatePipe() {
+  // Get canvas dimensions
+  const canvas = gameCanvas.value
+  if (!canvas) return
+  
+  // Calculate valid bounds for gap position
+  // Ensure minimum clearance from top and bottom (50 pixels + half gap height)
+  const minGapY = config.pipeGap / 2 + 50
+  const maxGapY = canvas.height - config.pipeGap / 2 - 50
+  
+  // Generate random gap position within valid bounds
+  const gapY = Math.random() * (maxGapY - minGapY) + minGapY
+  
+  // Create new pipe object
+  const pipe = {
+    x: canvas.width,              // Start at right edge
+    width: config.pipeWidth,      // Pipe width
+    gapY: gapY,                   // Gap center Y position
+    gapHeight: config.pipeGap,    // Gap height
+    passed: false                 // Not yet passed by ghost
+  }
+  
+  // Add pipe to pipes array
+  pipes.push(pipe)
+}
+
+/**
+ * Update pipes - move left and cleanup off-screen pipes
+ * Called every frame during the game loop
+ * 
+ * Movement:
+ * - All pipes move left by config.pipeSpeed pixels per frame
+ * 
+ * Cleanup:
+ * - Remove pipes that have exited the left edge of the canvas
+ * - Prevents memory growth from accumulating off-screen pipes
+ * 
+ * Generation:
+ * - Generate new pipes at regular intervals (config.pipeInterval frames)
+ * - Uses frameCounter to track timing
+ */
+function updatePipes() {
+  // Move all pipes left
+  pipes.forEach(pipe => {
+    pipe.x -= config.pipeSpeed
+  })
+  
+  // Remove pipes that have exited the left edge
+  // A pipe is off-screen when its right edge (x + width) is less than 0
+  pipes = pipes.filter(pipe => pipe.x + pipe.width > 0)
+  
+  // Generate new pipes at regular intervals
+  if (frameCounter % config.pipeInterval === 0) {
+    generatePipe()
+  }
+}
+
+/**
+ * Render all pipes
+ * Draws top and bottom pipe segments with gap between them
+ * Uses fillRect as placeholder for sprite rendering
+ * 
+ * Rendering:
+ * - Top pipe: From canvas top to gap top edge
+ * - Bottom pipe: From gap bottom edge to canvas bottom
+ * - Gap: Empty space between top and bottom pipes
+ * 
+ * TODO: Replace fillRect with sprite image rendering
+ * - Load pipe sprites (top and bottom segments)
+ * - Use ctx.drawImage() for each pipe segment
+ * - Ensure sprites scale with canvas dimensions
+ */
+function renderPipes() {
+  // Check if canvas is available
+  const canvas = gameCanvas.value
+  if (!canvas || !ctx) return
+  
+  // Set pipe color (green)
+  ctx.fillStyle = '#228B22'
+  
+  // Render each pipe
+  pipes.forEach(pipe => {
+    // Calculate top pipe dimensions
+    // Top pipe extends from canvas top (y=0) to gap top edge
+    const topPipeHeight = pipe.gapY - pipe.gapHeight / 2
+    
+    // Draw top pipe segment
+    ctx.fillRect(pipe.x, 0, pipe.width, topPipeHeight)
+    
+    // Calculate bottom pipe dimensions
+    // Bottom pipe starts at gap bottom edge and extends to canvas bottom
+    const bottomPipeY = pipe.gapY + pipe.gapHeight / 2
+    const bottomPipeHeight = canvas.height - bottomPipeY
+    
+    // Draw bottom pipe segment
+    ctx.fillRect(pipe.x, bottomPipeY, pipe.width, bottomPipeHeight)
+    
+    // TODO: Replace with sprite images when assets are integrated
+    // ctx.drawImage(pipeTopSprite, pipe.x, 0, pipe.width, topPipeHeight)
+    // ctx.drawImage(pipeBottomSprite, pipe.x, bottomPipeY, pipe.width, bottomPipeHeight)
+  })
+}
+
+/**
+ * Check for collisions using AABB (Axis-Aligned Bounding Box) algorithm
+ * Detects collisions between ghost and pipes, ceiling, and floor
+ * 
+ * Collision types:
+ * 1. Ceiling collision: ghost.y <= 0
+ * 2. Floor collision: ghost.y + ghost.height >= canvas.height
+ * 3. Pipe collision: AABB overlap between ghost and pipe segments
+ * 
+ * AABB Collision Detection:
+ * Two rectangles overlap if:
+ * - rect1.x < rect2.x + rect2.width (rect1 left edge is left of rect2 right edge)
+ * - rect1.x + rect1.width > rect2.x (rect1 right edge is right of rect2 left edge)
+ * - rect1.y < rect2.y + rect2.height (rect1 top edge is above rect2 bottom edge)
+ * - rect1.y + rect1.height > rect2.y (rect1 bottom edge is below rect2 top edge)
+ */
+function checkCollisions() {
+  const canvas = gameCanvas.value
+  if (!canvas) return
+  
+  // Check ceiling collision
+  if (ghost.y <= 0) {
+    endGame()
+    return
+  }
+  
+  // Check floor collision
+  if (ghost.y + ghost.height >= canvas.height) {
+    endGame()
+    return
+  }
+  
+  // Check pipe collisions
+  for (const pipe of pipes) {
+    // Only check pipes that overlap horizontally with ghost (optimization)
+    if (ghost.x + ghost.width > pipe.x && ghost.x < pipe.x + pipe.width) {
+      // Calculate top and bottom pipe boundaries
+      const topPipeBottom = pipe.gapY - pipe.gapHeight / 2
+      const bottomPipeTop = pipe.gapY + pipe.gapHeight / 2
+      
+      // Check if ghost is NOT in the gap (collision with top or bottom pipe)
+      // Collision occurs if ghost is above the gap (hits top pipe) or below the gap (hits bottom pipe)
+      if (ghost.y < topPipeBottom || ghost.y + ghost.height > bottomPipeTop) {
+        endGame()
+        return
+      }
+    }
+  }
+}
+
+/**
+ * End the game and transition to GAME_OVER state
+ * Called when any collision is detected
+ * 
+ * Game over actions:
+ * - Transition gameState to GAME_OVER
+ * - Game loop will automatically stop on next iteration
+ * - Final score is displayed in Game Over overlay
+ */
+function endGame() {
+  gameState.value = GameState.GAME_OVER
+  console.log('Flappy Kiro: Game over - Final score:', score.value)
+}
+
+/**
+ * Update score tracking
+ * Increments score when ghost successfully passes a pipe
+ * 
+ * Score logic:
+ * - Check each pipe to see if ghost has passed it
+ * - A pipe is "passed" when ghost.x > pipe.x + pipe.width
+ * - Use pipe.passed flag to prevent double counting
+ */
+function updateScore() {
+  pipes.forEach(pipe => {
+    // Check if ghost has passed this pipe (and hasn't been counted yet)
+    if (!pipe.passed && ghost.x > pipe.x + pipe.width) {
+      pipe.passed = true
+      score.value++
+    }
+  })
 }
 
 /**
@@ -114,15 +371,91 @@ function handleStart() {
   // Reset score
   score.value = 0
   
+  // Reset ghost position and velocity
+  ghost.y = 300
+  ghost.velocity = 0
+  
+  // Clear pipes array
+  pipes = []
+  
+  // Reset frame counter
+  frameCounter = 0
+  
   // Transition to PLAYING state
   gameState.value = GameState.PLAYING
+  
+  // Start game loop
+  gameLoop()
   
   console.log('Flappy Kiro: Game started')
 }
 
 // ============================================================================
+// GAME LOOP
+// ============================================================================
+
+// Animation frame ID for cleanup
+let animationFrameId = null
+
+/**
+ * Main game loop
+ * Runs at ~60 FPS using requestAnimationFrame
+ * 
+ * Loop structure:
+ * 1. Check if game is still in PLAYING state
+ * 2. Update game entities (physics, pipes)
+ * 3. Check collisions
+ * 4. Update score
+ * 5. Render all entities to canvas
+ * 6. Increment frame counter
+ * 7. Request next frame
+ */
+function gameLoop() {
+  // Stop loop if not in PLAYING state
+  if (gameState.value !== GameState.PLAYING) {
+    animationFrameId = null
+    return
+  }
+  
+  // Update phase
+  updateGhostPhysics()
+  updatePipes()
+  checkCollisions()
+  updateScore()
+  
+  // Render phase
+  clearCanvas()
+  renderPipes()
+  renderGhost()
+  
+  // Increment frame counter
+  frameCounter++
+  
+  // Continue loop
+  animationFrameId = requestAnimationFrame(gameLoop)
+}
+
+/**
+ * Clear canvas with background color
+ * Called before rendering each frame
+ */
+function clearCanvas() {
+  const canvas = gameCanvas.value
+  if (!canvas || !ctx) return
+  
+  // Fill with sky blue background
+  ctx.fillStyle = '#87CEEB'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+// ============================================================================
 // LIFECYCLE HOOKS
 // ============================================================================
+
+// Event handler references for cleanup
+let keydownHandler = null
+let clickHandler = null
+let touchstartHandler = null
 
 onMounted(() => {
   try {
@@ -148,6 +481,32 @@ onMounted(() => {
     ctx.fillStyle = '#87CEEB' // Sky blue
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     
+    // Create event handler for keyboard input (Spacebar)
+    keydownHandler = (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault()
+        handleJump()
+      }
+    }
+    
+    // Create event handler for mouse click
+    clickHandler = handleJump
+    
+    // Create event handler for touch input
+    touchstartHandler = (e) => {
+      e.preventDefault()
+      handleJump()
+    }
+    
+    // Add keyboard event listener for jump (Spacebar)
+    window.addEventListener('keydown', keydownHandler)
+    
+    // Add mouse click event listener for jump
+    canvas.addEventListener('click', clickHandler)
+    
+    // Add touch event listener for mobile support
+    canvas.addEventListener('touchstart', touchstartHandler)
+    
     console.log('Flappy Kiro: Canvas initialized successfully')
   } catch (error) {
     console.error('Flappy Kiro: Failed to initialize canvas:', error.message)
@@ -156,8 +515,27 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Cleanup will be added in later tasks
-  console.log('Flappy Kiro: Component unmounted')
+  // Cancel animation frame if running
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
+  
+  // Remove event listeners to prevent memory leaks
+  const canvas = gameCanvas.value
+  
+  if (keydownHandler) {
+    window.removeEventListener('keydown', keydownHandler)
+  }
+  
+  if (canvas && clickHandler) {
+    canvas.removeEventListener('click', clickHandler)
+  }
+  
+  if (canvas && touchstartHandler) {
+    canvas.removeEventListener('touchstart', touchstartHandler)
+  }
+  
+  console.log('Flappy Kiro: Component unmounted, event listeners cleaned up')
 })
 </script>
 

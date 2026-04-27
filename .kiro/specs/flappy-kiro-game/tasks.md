@@ -47,7 +47,7 @@ This implementation plan breaks down the Flappy Kiro game into discrete coding t
     - **Property 4: UI Overlays Match Game State**
     - **Validates: Requirements 2.4**
 
-- [ ] 3. Implement ghost character and physics
+- [x] 3. Implement ghost character and physics
   - [x] 3.1 Create ghost entity object
     - Define non-reactive ghost object with x, y, width, height, velocity, gravity, jumpForce
     - Initialize ghost at starting position
@@ -59,129 +59,129 @@ This implementation plan breaks down the Flappy Kiro game into discrete coding t
     - Ensure position updates by velocity each frame
     - _Requirements: 4.2, 4.4_
   
-  - [-] 3.3 Implement jump mechanic
+  - [x] 3.3 Implement jump mechanic
     - Write handleJump function to set velocity to jumpForce
     - Only apply jump when gameState is PLAYING
     - _Requirements: 4.3, 11.3_
   
-  - [~] 3.4 Implement ghost rendering
+  - [x] 3.4 Implement ghost rendering
     - Write renderGhost function using fillRect for placeholder
     - Add TODO comment for sprite integration
     - _Requirements: 4.5, 4.6, 10.2, 10.3_
   
-  - [~] 3.5 Write property test for gravity acceleration
+  - [x] 3.5 Write property test for gravity acceleration
     - **Property 6: Gravity Acceleration**
     - **Validates: Requirements 4.2**
   
-  - [~] 3.6 Write property test for jump velocity
+  - [x] 3.6 Write property test for jump velocity
     - **Property 7: Jump Applies Upward Velocity**
     - **Validates: Requirements 4.3**
   
-  - [~] 3.7 Write property test for position updates
+  - [x] 3.7 Write property test for position updates
     - **Property 8: Position Updates by Velocity**
     - **Validates: Requirements 4.4**
   
-  - [~] 3.8 Write property test for jump ignored when not playing
+  - [x] 3.8 Write property test for jump ignored when not playing
     - **Property 17: Jump Ignored When Not Playing**
     - **Validates: Requirements 11.3**
 
-- [~] 4. Checkpoint - Verify ghost physics and rendering
+- [x] 4. Checkpoint - Verify ghost physics and rendering
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement pipe generation and movement
-  - [~] 5.1 Create pipe entity structure
+- [x] 5. Implement pipe generation and movement
+  - [x] 5.1 Create pipe entity structure
     - Define pipe object structure with x, width, gapY, gapHeight, passed
     - Create pipes array to hold active pipes
     - _Requirements: 5.6_
   
-  - [~] 5.2 Implement pipe generation logic
+  - [x] 5.2 Implement pipe generation logic
     - Write generatePipe function with random gap positioning
     - Ensure gap position is within valid bounds
     - Add frame counter for interval-based generation
     - _Requirements: 5.3, 5.5_
   
-  - [~] 5.3 Implement pipe movement and cleanup
+  - [x] 5.3 Implement pipe movement and cleanup
     - Write updatePipes function to move pipes left
     - Remove pipes that exit the left edge
     - Call generatePipe at regular intervals
     - _Requirements: 5.1, 5.2, 5.3_
   
-  - [~] 5.4 Implement pipe rendering
+  - [x] 5.4 Implement pipe rendering
     - Write renderPipes function to draw top and bottom pipe segments
     - Use fillRect for placeholder rendering
     - Add TODO comments for sprite integration
     - _Requirements: 5.7, 5.8, 10.2, 10.3_
   
-  - [~] 5.5 Write property test for pipes moving left
+  - [x] 5.5 Write property test for pipes moving left
     - **Property 9: Pipes Move Left**
     - **Validates: Requirements 5.1**
   
-  - [~] 5.6 Write property test for pipe removal at boundary
+  - [x] 5.6 Write property test for pipe removal at boundary
     - **Property 10: Pipe Removal at Boundary**
     - **Validates: Requirements 5.2**
   
-  - [~] 5.7 Write property test for pipe generation interval
+  - [x] 5.7 Write property test for pipe generation interval
     - **Property 11: Pipe Generation Interval**
     - **Validates: Requirements 5.3**
   
-  - [~] 5.8 Write property test for gap position bounds
+  - [x] 5.8 Write property test for gap position bounds
     - **Property 12: Gap Position Bounds**
     - **Validates: Requirements 5.5**
 
-- [ ] 6. Implement collision detection system
-  - [~] 6.1 Implement AABB collision detection
+- [x] 6. Implement collision detection system
+  - [x] 6.1 Implement AABB collision detection
     - Write checkCollisions function with AABB algorithm
     - Check ghost vs pipes collision
     - Check ghost vs ceiling collision
     - Check ghost vs floor collision
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
   
-  - [~] 6.2 Implement game over logic
+  - [x] 6.2 Implement game over logic
     - Write endGame function to transition to GAME_OVER state
     - Call endGame when any collision is detected
     - _Requirements: 1.4, 6.5_
   
-  - [~] 6.3 Write property test for AABB collision detection
+  - [x] 6.3 Write property test for AABB collision detection
     - **Property 13: AABB Collision Detection**
     - **Validates: Requirements 6.1**
   
-  - [~] 6.4 Write property test for collision causes game over
+  - [x] 6.4 Write property test for collision causes game over
     - **Property 3: Collision Causes Game Over**
     - **Validates: Requirements 1.4, 6.2, 6.3, 6.4**
 
-- [ ] 7. Implement score tracking
-  - [~] 7.1 Implement score increment logic
+- [x] 7. Implement score tracking
+  - [x] 7.1 Implement score increment logic
     - Write updateScore function to check if ghost passed pipes
     - Increment score when ghost.x > pipe.x + pipe.width
     - Mark pipes as passed to prevent double counting
     - _Requirements: 7.2_
   
-  - [~] 7.2 Implement score reset on game restart
+  - [x] 7.2 Implement score reset on game restart
     - Reset score to 0 when transitioning to START_SCREEN
     - _Requirements: 7.4_
   
-  - [~] 7.3 Write property test for score increment on pass
+  - [x] 7.3 Write property test for score increment on pass
     - **Property 14: Score Increment on Pass**
     - **Validates: Requirements 7.2**
   
-  - [~] 7.4 Write property test for score reset on restart
+  - [x] 7.4 Write property test for score reset on restart
     - **Property 15: Score Reset on Restart**
     - **Validates: Requirements 7.4**
 
-- [ ] 8. Implement game loop and state transitions
-  - [~] 8.1 Create game loop with requestAnimationFrame
+- [x] 8. Implement game loop and state transitions
+  - [x] 8.1 Create game loop with requestAnimationFrame
     - Write gameLoop function with RAF
     - Add frame counter and timestamp tracking
     - Call update functions before render functions
     - Only run loop when gameState is PLAYING
     - _Requirements: 3.2, 3.4, 12.4_
   
-  - [~] 8.2 Implement canvas clearing and render order
+  - [x] 8.2 Implement canvas clearing and render order
     - Write clearCanvas function with background color
     - Call render functions in correct order (pipes, ghost)
     - _Requirements: 12.3_
   
-  - [~] 8.3 Implement start game function
+  - [x] 8.3 Implement start game function
     - Write handleStart function to initialize game state
     - Reset ghost position and velocity
     - Clear pipes array
@@ -190,41 +190,41 @@ This implementation plan breaks down the Flappy Kiro game into discrete coding t
     - Start game loop
     - _Requirements: 1.3, 12.2_
   
-  - [~] 8.4 Implement game loop cleanup
+  - [x] 8.4 Implement game loop cleanup
     - Cancel animation frame when game stops
     - Store animation frame ID for cleanup
     - _Requirements: 12.1, 12.5_
   
-  - [~] 8.5 Write property test for start transition
+  - [x] 8.5 Write property test for start transition
     - **Property 2: Start Transition**
     - **Validates: Requirements 1.3**
   
-  - [~] 8.6 Write property test for game loop pauses in non-playing states
+  - [x] 8.6 Write property test for game loop pauses in non-playing states
     - **Property 5: Game Loop Pauses in Non-Playing States**
     - **Validates: Requirements 3.5, 12.1**
 
-- [~] 9. Checkpoint - Verify complete game loop
+- [x] 9. Checkpoint - Verify complete game loop
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 10. Implement input handling
-  - [~] 10.1 Add keyboard event listeners
+- [x] 10. Implement input handling
+  - [x] 10.1 Add keyboard event listeners
     - Listen for Spacebar keydown event
     - Call handleJump on Spacebar press
     - Prevent default browser behavior for Spacebar
     - _Requirements: 11.1, 11.4_
   
-  - [~] 10.2 Add mouse and touch event listeners
+  - [x] 10.2 Add mouse and touch event listeners
     - Listen for click event on canvas
     - Listen for touchstart event on canvas
     - Call handleJump for both events
     - Prevent default for touch events
     - _Requirements: 11.2, 13.8_
   
-  - [~] 10.3 Add event listener cleanup
+  - [x] 10.3 Add event listener cleanup
     - Remove all event listeners in onUnmounted hook
     - _Requirements: 11.5_
   
-  - [~] 10.4 Write unit tests for input handling
+  - [x] 10.4 Write unit tests for input handling
     - Test Spacebar triggers jump
     - Test click triggers jump
     - Test preventDefault is called
@@ -249,7 +249,7 @@ This implementation plan breaks down the Flappy Kiro game into discrete coding t
     - Test config values are modifiable
     - _Requirements: 9.1, 9.2, 9.4, 9.5_
 
-- [ ] 12. Implement responsive design and scaling
+- [~] 12. Implement responsive design and scaling
   - [~] 12.1 Implement viewport detection and canvas sizing
     - Write handleResize function to detect viewport dimensions
     - Calculate canvas dimensions maintaining aspect ratio
@@ -281,7 +281,7 @@ This implementation plan breaks down the Flappy Kiro game into discrete coding t
     - **Property 20: UI Responsive Scaling**
     - **Validates: Requirements 13.6**
 
-- [ ] 13. Add code documentation and asset integration comments
+- [~] 13. Add code documentation and asset integration comments
   - [~] 13.1 Add comments explaining major code sections
     - Document game loop logic
     - Document physics calculations
